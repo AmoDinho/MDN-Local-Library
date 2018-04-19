@@ -6,6 +6,7 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var catalog = require('./routes/catalog');
 
 var app = express();
 
@@ -20,10 +21,10 @@ mongoose.connect(mongoDB);
 //Get Mongose to use global promise library
 mongoose.Promise = global.Promise;
 //get the default connection
-var db = mongoose.connect;
+//var db = mongoose.connect;
 
 //bind connection to error event
-db.on('error', console.error.bind(console, 'MongoDB connecntion error:'));
+//db.on('error', console.error.bind(console, 'MongoDB connecntion error:'));
 
 
 
@@ -39,6 +40,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/catalog', catalog);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
