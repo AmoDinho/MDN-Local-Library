@@ -1,10 +1,18 @@
 //bookinstance Controller
 
-var BookInstance = require('../models/bookinstance');
 
+var BookInstance = require('../models/bookinstance');
+var Book = require('../models/book');
+var async = require('async');
 //Display list of bookinstance
-exports.bookinstance_list = function(req,res){
-    res.send('bookinstance List');
+exports.bookinstance_list = function(req,res,next){
+    BookInstance.find()
+    .populate('book')
+    .exec(function (err, list_bookinstances) {
+      if (err) { return next(err); }
+      // Successful, so render
+      res.render('bookinstance_list', { title: 'Book Instance List', bookinstance_list: list_bookinstances });
+    });
 };
 
 //display detail page for an autbookinstancehor
