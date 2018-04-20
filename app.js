@@ -10,21 +10,24 @@ var catalog = require('./routes/catalog');
 
 var app = express();
 
+app.use(helmet());
 //Mongoose Setup
 //Import the module
 var mongoose = require('mongoose');
 
+
 //set up default mongoose connection
-var mongoDB = 'mongodb://127.0.0.1/my_database';
+var dev_db_url = 'mongodb://amo:password@ds249079.mlab.com:49079/local_library'
+var mongoDB = process.env.MONGODB_URI || dev_db_url;
 mongoose.connect(mongoDB);
 
 //Get Mongose to use global promise library
 mongoose.Promise = global.Promise;
 //get the default connection
-//var db = mongoose.connect;
+var db = mongoose.connect;
 
 //bind connection to error event
-//db.on('error', console.error.bind(console, 'MongoDB connecntion error:'));
+db.on('error', console.error.bind(console, 'MongoDB connecntion error:'));
 
 
 
