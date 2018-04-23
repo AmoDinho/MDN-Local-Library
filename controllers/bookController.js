@@ -58,8 +58,37 @@ Book.find({}, 'title author')
 
 //display detail page for an book
 exports.book_detail = function(req,res){
-    res.send('book details' + req.params.id);
+    
+    //Async Fucntion
+
+  async.parallel({
+      book: function(callback){
+
+        Book.findById(req.params.id)
+           .populate('author')
+           .populate('genre')
+           .exec(callback);
+      },
+      book_instance: function(callback){
+          BookInstance.find({'book': req.params.id})
+          .exec(callback);
+      },
+    }, function(err,results){
+        if (err) {return next(err);}
+        if (results.book = null){
+            //No results
+            var err = new Error('book not found');
+            err.status = 404;
+            return next(err);
+        }
+        //Successful render
+        res.render('book_detail', {title:'Book Results', book:results.book, book_instances: results.book_instance});
+    
+
+  });
 };
+
+
 
 //Display book create form on GET
 exports.book_create_get = function(req,res){
