@@ -14,46 +14,46 @@ exports.index = function(req, res,next){
     /*Do something smaller
      Total books
     */
- /*    
+     
 //Async Function
 async.parallel({
      book_count: function(callback){
-         Book.count({});
+         Book.count({}, callback);
      },
      book_instance_count: function(callback){
-         BookInstance.count({},callback);
+         BookInstance.count({}, callback);
      },
      book_instance_available_count: function(callback) {
         BookInstance.count({status:'Available'}, callback);
     },
      author_count:  function(callback){
-         Author.count({},callback);
+         Author.count({}, callback);
      },
      genre_count: function(callback){
          Genre.count({}, callback);
      }, 
      
     }, function(err, results) {
-        console.log('working');
-        res.render('/index', {title:'Local Library Home', error: err, data: results});
+        //console.log('working');
+        res.render('index', {title:'Local Library Home', error: err, data: results});
      });
 
 //res.send('Site Home Page');
-*/
-res.render('/index',{title:'page'})
+
+//res.render('index',{title:'page'})
 
 };
 
 //Display list of book
 exports.book_list = function(req,res, next){
-/*
+
 Book.find({}, 'title author')
     .populate('author')
     .exec(function(err,list_books){
         if(err){return next(err);}
         res.render('book_list', {title:'Book List',book_list:list_books});
     });
-*/
+
 };
 
 //display detail page for an book

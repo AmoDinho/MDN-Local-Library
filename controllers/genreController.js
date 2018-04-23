@@ -4,7 +4,14 @@ var Genre = require('../models/genre');
 
 //Display list of genre
 exports.genre_list = function(req,res){
-    res.send('genre List');
+    Genre.find()
+    .sort([['name','ascending']])
+    .exec(function (err,list_genres){
+        if(err) {return next(err);}
+        //Succesfful render
+        res.render('genre_list', {title:'Genre List', list_genres:list_genres});
+
+    });
 };
 
 //display detail page for an genre

@@ -19,7 +19,8 @@ var mongoose = require('mongoose');
 
 
 //set up default mongoose connection
-var mongoDB = 'mongodb://newuser:sony@ds249079.mlab.com:49079/local_library'
+var dev_db_url = 'mongodb://newuser:sony@ds249079.mlab.com:49079/local_library'
+var mongoDB = process.env.MONGODB_URI || dev_db_url;
 mongoose.connect(mongoDB);
 
 //Get Mongose to use global promise library
@@ -29,7 +30,6 @@ var db = mongoose.connection;
 
 //bind connection to error event
 db.on('error', console.error.bind(console, 'MongoDB connecntion error:'));
-
 
 
 // view engine setup

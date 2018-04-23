@@ -4,7 +4,16 @@ var Author = require('../models/author');
 
 //Display list of authors
 exports.author_list = function(req,res){
-    res.send('Author List');
+
+    Author.find()
+       .sort([['family_name','ascending']])
+       .exec(function (err,list_authors){
+           if(err) {return next(err);}
+           //Succesfful render
+           res.render('author_list', {title:'Author List', author_list:list_authors});
+
+       });
+
 };
 
 //display detail page for an author
