@@ -17,7 +17,21 @@ exports.bookinstance_list = function(req,res,next){
 
 //display detail page for an autbookinstancehor
 exports.bookinstance_detail = function(req,res){
-    res.send('bookinstance details' + req.params.id);
+
+//Query
+   BookInstance.findById(req.params.id)
+      .populate('book')
+      .exec(function (err,bookinstance){
+          if (err) {return next(err);}
+          if (bookinstance == null){
+              var err = new Error('Book copy not found');
+              err.status =404;
+              return next(err);
+          }
+          //Succesful Render
+          res.render('bookinstance_detail', {title:'Book', bookinstance: bookinstance});
+      })
+
 };
 
 //Display bookinstance create form on GET

@@ -75,7 +75,7 @@ exports.book_detail = function(req,res){
       },
     }, function(err,results){
         if (err) {return next(err);}
-        if (results.book = null){
+        if (results.book == null){
             //No results
             var err = new Error('book not found');
             err.status = 404;

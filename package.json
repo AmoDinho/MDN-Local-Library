@@ -12,6 +12,8 @@
   "dependencies": {
     "async": "^2.6.0",
     "cookie-parser": "~1.4.3",
+    "express-validator": "^5.1.2",
+    "moment": "^2.22.1",
     "debug": "~2.6.9",
     "express": "~4.16.0",
     "express-generator": "^4.16.0",
@@ -23,7 +25,7 @@
     "mongodb": "^3.0.7"
   },
   "devDependencies": {
-    "moment": "^2.22.1",
+    
     "nodemon": "^1.17.3"
   }
 }
