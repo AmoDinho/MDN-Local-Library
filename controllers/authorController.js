@@ -111,13 +111,60 @@ exports.author_create_post = [
 
 //Display Author delete form on GET
 exports.author_delete_get = function(req,res){
-    res.send('Author delte get');
+
+
+    //Async Function
+    async.parallel({
+        author: function(callback){
+            Author.findById(req.params.id).exec(callback)
+        },
+        authors_books: function(callback){
+            Book.find({'author': req.params.id}).exec(callback)
+        },
+    }, function(err,results){
+        if(err) { return next(err);}
+    if (results.author ==null){
+    //no results
+    res.redirect('/catalog/authors');
+    }
+    //Successful so render.
+    res.render('author_delete', {title: 'Delete AUthor', author: results.author, author_books: results.authors_books});
+    });
 };
 
 
-//handle author on post
+//handle Delete author on post
 exports.author_delete_post = function(req,res){
-    res.send('Author delete post');
+
+    async.parallel({
+        author: function(callback){
+          Author.findById(req.body.authorid).exec(callback)
+        },
+        authors_books: function(callback){
+            Book.find({'author': req.body.authorid}).exec(callback)
+        },
+    }, function(err, results){
+        if(err) {return next(err);}
+        //Success
+        if (results.authors_books.length > 0){
+            //Author has books render in same way as GET route.
+
+            res.render('authors_delete', {title:'Delete Author', author: results.author, author_books: results.author_books});
+            return;
+        }
+        else{
+            //Author has no books. DELETE OBJECT and redirect to the list of authors
+            Author.findByIdAndRemove(req.body.authorid, function deleteAuthor(err){
+                if (err){ return next(err);}
+                //success go to authormlist
+                res.redirect('/catalog/authors')
+            })
+        }
+    
+
+
+    });
+
 };
 
 //Display Author update form on get
