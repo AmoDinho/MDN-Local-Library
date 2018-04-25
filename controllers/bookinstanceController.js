@@ -4,6 +4,12 @@
 var BookInstance = require('../models/bookinstance');
 var Book = require('../models/book');
 var async = require('async');
+
+//Sanitization modules
+const { body,validationResult } = require('express-validator/check');
+const { sanitizeBody } = require('express-validator/filter');
+
+
 //Display list of bookinstance
 exports.bookinstance_list = function(req,res,next){
     BookInstance.find()
@@ -36,13 +42,67 @@ exports.bookinstance_detail = function(req,res){
 
 //Display bookinstance create form on GET
 exports.bookinstance_create_get = function(req,res){
-    res.send('bookinstance create get');
+    
+    Book.find({}, 'title')
+     .exec(function (err,books){
+         if (err) {return next(err);}
+         //SUccessfull so render
+         res.render('bookinstance_form', {title: 'Create Book Instance ', book_list:books});
+     });
 };
 
+
 //Handle bookinstance create on POST
-exports.bookinstance_create_post = function(req,res){
-    res.send('bookinstance create_post');
-};
+exports.bookinstance_create_post = [
+
+    //Validate fields
+    body('book', 'Book must be specified').isLength({min:1}).trim(),
+    body('imprint', 'Imprint must be specified').isLength({min:1}).trim(),
+    body('due back', 'Invalid Date').optional({checkFalsy: true}).isISO8601(),
+
+    //Sanitize fields
+    sanitizeBody('book').trim().escape(),
+    sanitizeBody('imprint').trim().escape(),
+    sanitizeBody('status').trim().escape(),
+    sanitizeBody('due_back').toDate(),
+
+    //Process request after validation and sanitization
+    (req, res, next) => {
+
+        //Extract the validation errors from a request
+        const errors = validationResult(req);
+
+        //Create a bookinstance object with escaped and trimmed data
+        var bookinstance = new BookInstance({
+            book: req.body.book,
+            imprint: req.body.imprint, 
+            status: req.body.status,
+            due_back: req.body.due_back
+        });
+
+
+
+        if (!errors.isEmpty()){
+            // THERE ARE NO ERRORS. RENDER FORM AGAIN WITH SANITIZED VALUES AND ERROR MESSAGES
+            Book.find({}, 'title')
+                .exec( function (err,books){
+                    if (err){return next(err);}
+                    //Successful so render that mayn!
+                    res.render('bookinstance_form', {title: 'create BookInstance', book_list: books, selected_book: bookinstance.book._id, errors: errors.array(), bookinstance:bookinstance});
+                });
+                return;
+        }
+        else{
+            //Data from form is valid
+            bookinstance.save(function (err){
+                if (err){return next(err);}
+                //succesful redircet to new record
+                res.redirect(bookinstance.url);
+            });
+        }
+    }
+
+];
 
 //Display bookinstance delete form on GET
 exports.bookinstance_delete_get = function(req,res){
