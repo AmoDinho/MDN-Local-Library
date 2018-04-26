@@ -168,11 +168,68 @@ exports.author_delete_post = function(req,res){
 };
 
 //Display Author update form on get
-exports.author_update_get = function(req,res){
-    res.send('Author update_get');
+exports.author_update_get = function(req,res,next){
+    
+    //Find the author of the particular book
+    Author.findById(req.params.id, function(Err, author){
+         if (err) { return next(err);}
+         if (author == null){
+             //no results
+             var err = new Error('Author not found');
+             err.stats = 404;
+             return next(err);
+         }
+         //Success
+         res.render('author_form', {title: 'Update Author', author: author});
+    });
 };
 
 //handle author update on Post
-exports.author_update_post = function(req,res){
-    res.send('Author update post');
-};
+exports.author_update_post = [
+
+         //Validate fields
+        body('first_name').isLength({min:1}).trim().withMessage('First name must be specified'),
+       
+        body('family_name').isLength({min:1}).trim().withMessage('Family name must be specified'),
+           
+        body('date_of_birth', 'Invalid date of birth').optional({checkFalsy:true}).isISO8601(),
+        body('date_of_death', 'Invalid date of death').optional({checkFalsy:true}).isISO8601(), 
+
+        //Sanitize fieldss
+        sanitizeBody('first_name').trim().escape(),
+        sanitizeBody('family_name').trim().escape(),
+        sanitizeBody('date_of_birth').toDate(),
+        sanitizeBody('date_of_death').toDate(),
+
+        //Process request after validation and sanitization 
+        (req, res, next) =>{
+
+            //extract the validation errors from a request
+            const errors = validationResult(req);
+
+            //Create Author object with escaped and trimmed data
+            var author = new Author({
+                 first_name: req.body.first_name,
+                 family_name: req.body.family_name,
+                 date_of_birth: req.body.date_of_birth,
+                 date_of_death: req.body.date_of_death,
+                 _id: req.params.id
+            });
+
+            if(!errors.isEmpty()){
+                //There are errors. Render form with sanitized values
+                res.render('author_form', {title:'Update Author', author: author, errors:errors.array()});
+                return;
+            }
+            else{
+                //Data from form is valid. Update Record
+                Author.findByIdAndUpdate( req.params.id, author, {}, function(err, theauthor){
+                    if (err){return next(err);}
+                    //successful 
+                    res.redirect(theauthor.url);
+                });
+            }
+        }
+
+
+];
