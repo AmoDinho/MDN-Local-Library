@@ -198,7 +198,7 @@ exports.author_update_post = [
         //Sanitize fieldss
         sanitizeBody('first_name').trim().escape(),
         sanitizeBody('family_name').trim().escape(),
-        sanitizeBody('date_of_birth').toDate(),
+        sanitizeBody('date_of_birth').toDate(), 
         sanitizeBody('date_of_death').toDate(),
 
         //Process request after validation and sanitization 
