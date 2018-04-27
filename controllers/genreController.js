@@ -107,15 +107,64 @@ exports.genre_create_post = [
 ];
 
 //Display genre delete form on GET
-exports.genre_delete_get = function(req,res){
-    res.send('genre delte get');
+exports.genre_delete_get = function(req,res,next){
+
+//Async function
+
+     async.parallel({
+         genre: function(callback){
+             Genre.findById(req.params.id).exec(callback);
+         },
+         genre_books: function(callback){
+             Book.find({'genre':req.params.id}).exec(callback);
+         },
+        }, function(err, results){
+            if (err){return next(err);}
+            if (results.genre==null){
+                res.redirect('/catalog/genres');
+            }
+            //successful so render
+            res.render('genre_delete', {title:'Delete Genre', genre:results.genre, genre_books: results.genre_books});
+        
+
+     });
 };
 
 
 //handle genre delete on post
-exports.genre_delete_post = function(req,res){
-    res.send('genre delete post');
+exports.genre_delete_post = function(req,res,next){
+         
+
+    //Aysnc Function
+    async.parallel({
+        genre: function(callback){
+            Genre.findById(req.params.id).exec(callback);
+        },
+        genre_books: function(callback){
+            Book.find({'genre': req.params.id}).exec(callback);
+        },
+    }, function(err,results){
+        if(err) {return next(err);}
+        //Success
+        if (results.genre_books.length>0){
+            //Genre has books render in same way as for GET Route
+            res.render('genre_delete', {title:'Delete Genre', genre:results.genre, genre_books: results.genre_books})
+            return;
+    }
+    else{
+        //Genre has no books Delete Object and redirect to the list of genres
+        Genre.findByIdAndRemove(req.body.id, function deleteGenre(err){
+            if (err){return next(err);}
+            //Success 
+            res.redirect('/catalog/genres');
+        });
+    }
+    });
 };
+
+
+
+
 
 //Display genre update form on get
 exports.genre_update_get = function(req,res,next){

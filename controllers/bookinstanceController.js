@@ -1,3 +1,5 @@
+
+
 //bookinstance Controller
 
 
@@ -105,15 +107,40 @@ exports.bookinstance_create_post = [
 ];
 
 //Display bookinstance delete form on GET
-exports.bookinstance_delete_get = function(req,res){
-    res.send('bookinstance delte get');
+exports.bookinstance_delete_get = function(req,res,next ){
+
+
+    //Get book authors and genres for form
+  
+   
+    BookInstance.findById(req.params.id)
+    .populate('book')
+    .exec(function (err, bookinstance) {
+        if (err) { return next(err); }
+        if (bookinstance==null) { // No results.
+            res.redirect('/catalog/bookinstances');
+        }
+        // Successful, so render.
+        res.render('bookinstance_delete', { title: 'Delete BookInstance', bookinstance:  bookinstance});
+    })
+
 };
 
 
 //handle bookinstance delete on post
-exports.bookinstance_delete_post = function(req,res){
-    res.send('bookinstance delete post');
+exports.bookinstance_delete_post = function(req, res, next){
+    //Assume valid BookInstance id in field
+    BookInstance.findByIdAndRemove(req.body.id, function deleteBookInstance(err){
+        if (err) {return next(err);}
+        //success so redirect 
+        res.redirect('/catalog/bookinstances');
+    });
 };
+
+
+
+
+
 
 //Display bookinstance update form on get
 exports.bookinstance_update_get = function(req,res,next){

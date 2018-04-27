@@ -195,14 +195,62 @@ exports.book_create_post = [
 //Display book delete form on GET
 exports.book_delete_get = function(req,res, next){
    
+
+    //Async Fucntion
+    async.parallel({
+        book: function(callback){
+            Book.findById(req.params.id).populate('author').populate('genre').exec(callback);
+        },
+        book_bookinstnaces: function(callback){
+            BookInstance.find({'book': req.params.id}).exec(callback);
+        },
+    }, function(err, results){
+        if(err){return next(err);}
+        if(results.book==null){
+            res.redirect('/catalog/books');
+        }
+        //succesful so render
+        res.render('book_delete', {title:'Delete Book', book: results.book , book_instances: results.book_bookinstnaces });
+    
+    });
 };
 
 
 //handle book delete on post
-exports.book_delete_post = [
-  
+exports.book_delete_post = function(req,res, next){
+    //Assume the post has a vaild id
 
-]
+
+       //Aysnc function
+       async.parallel({
+           book: function(callback)
+              {
+                Book.findById(req.params.id).populate('author').populate('genre').exec(callback);
+
+              },
+              book_bookinstances: function(callback){
+                  BookInstance.find({'book': req.params.id}).exec(callback);
+              },
+            }, function(err, results){
+                if(err) {return next(err);}
+                //Succeessss
+                if (results.book_bookinstances.length>0){
+                    //Book has boook instances. Render in same way for get routwe
+                     res.render('book_delete', {title:'Delete Book', book: results.book, book_instances: results.book_bookinstances});
+                    return;
+                }
+                else{
+                    ///Book has no BookInstance objects Delete the object and redircet to the rest o the books.
+                    Book.findByIdAndRemove(req.body.id, function deleteBook(err){
+                        if(err){return next(err);}
+                        //Sucees 
+                        res.redirect('/catalog/books');
+                    });
+                }
+            
+      
+        });
+};
 
 //Display book update form on get
 exports.book_update_get = function(req,res){
